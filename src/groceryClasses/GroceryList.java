@@ -41,8 +41,6 @@ public class GroceryList {
             String item = itemList.get(min); // swaps places
             itemList.set(min, itemList.get(i));
             itemList.set(i, item);
-
-            System.out.println("Loop finished.");
         }
     }
 }
