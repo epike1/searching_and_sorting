@@ -1,24 +1,139 @@
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
 import groceryClasses.*;
-import weatherClasses.*;
+import financeClasses.*;
 import java.util.Scanner;
 public class Main {
 
+	private static Scanner input = new Scanner(System.in);
 
-
-    public static void runFinanceProgram() {
-        System.out.println("Enter the weather data for each day of the work week.");
-
-        WeatherList weatherList = new WeatherList();
-
-        System.out.println("Weather data created.\n");
-        weatherList.displayList();
+	
+	private static void transactionHistory(BankAccount bankAccount) {
+		
+		System.out.print("\nSelect a sorting method. Possible options are time, amount or type anything else to go back: ");
+		
+		input.nextLine();
+		String type = input.nextLine().trim().toLowerCase();
+		
+		switch(type) {
+			case "amount":
+				bankAccount.displayByAmount();
+				break;
+			case "time":
+				bankAccount.displayByTime();
+				break;
+		}
+	}
+	
+	private static double getAmount() {
+		
+		double amount = 0.00; 
+		do {
+			System.out.print("\nEnter the amount: ");
+			try {
+				amount = input.nextDouble();
+			} catch (Exception e) {
+				System.out.println("Invalid input. Must be a number.");
+				input.next();
+				continue;
+			}
+			
+			if (amount > 0) {
+				return amount;
+			}
+			
+			System.out.println("Invalid amount. Must be greater than $0.00.");
+			
+		} while (true);
+	}
+	
+	private static double getTransactionInfo() {
+		double amount = 0.00;
+		
+		amount = getAmount();
+		input.nextLine();
+		String type = "";
+		do {
+			System.out.print("\nAre you looking for a withdrawal or a deposit?: ");
+			type = input.nextLine().trim().toLowerCase();
+			
+			switch(type) {
+				case "deposit":
+					return amount;
+				case "withdrawal":
+					amount *= -1;
+					return amount;
+				default:
+					System.out.println("Invalid choice. Must be deposit or withdrawal.");
+					break;
+			}
+		} while (true);
+	}
+	
+    private static void runFinanceProgram() {
+        
+    	System.out.print("Enter your name: ");
+    	String name = input.nextLine();
+    	
+    	BankAccount bankAccount = new BankAccount(name);
+    	
+    	System.out.printf("Welcome, %s.%n", bankAccount.getName());
+    	
+    	int choice = 0;
+    	boolean quit = false;
+    	do {
+    		
+    		System.out.println("\nAccount Options:");
+    		System.out.println("1. Deposit");
+			System.out.println("2. Withdraw");
+			System.out.println("3. View Transaction History");
+			System.out.println("4. Search for Transaction Amount");
+			System.out.println("5. Quit program");
+			System.out.print("Enter your choice: ");
+    		try {
+    			choice = input.nextInt();
+    		} catch (Exception e) {
+    			System.out.println("Invalid choice.");
+    			input.next();
+    			continue;
+    		}
+    		
+    		switch (choice) {
+	    		case 1:
+	    			bankAccount.createTransaction(getAmount());
+	    			break;
+	    		case 2:
+	    			bankAccount.createTransaction(getAmount() * -1);
+	    			break;
+	    		case 3:
+	    			transactionHistory(bankAccount);
+	    			break;
+	    		case 4:
+	    			bankAccount.getTransaction(getTransactionInfo());
+	    			break;
+	    		case 5:
+	    			quit = true;
+	    			break;
+	    		default:
+	    			System.out.println("Invalid choice. Must be 1 - 5.");
+	    			break;
+    		}
+    		
+    		
+    	} while (!quit);
+    	
+    	double totalAmount = bankAccount.calculateTotal();
+    	
+    	if (totalAmount < 0) {
+    		System.out.printf("You are $%.2f in debt.", Math.abs(totalAmount));
+    	} else {
+    		System.out.printf("You have $%.2f in your account.", totalAmount);
+    	}
     }
-    public static void runGroceryProgram() {
+    
+    private static void runGroceryProgram() {
 
         GroceryList groceryList = new GroceryList();
-        Scanner input = new Scanner(System.in);
         String currentItem = "";
 
         do {
@@ -46,8 +161,6 @@ public class Main {
             }
         } while(true);
 
-        input.close();
-
         System.out.print("Original List: ");
         System.out.println(groceryList.getItemList());
 
@@ -58,7 +171,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        runGroceryProgram();
-        //runWeatherProgram();
+        //runGroceryProgram();
+        runFinanceProgram();
+        input.close();
     }
 }

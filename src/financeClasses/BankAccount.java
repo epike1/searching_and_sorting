@@ -21,25 +21,28 @@ public class BankAccount {
     }
 
     private LinkedList<Double> getSortedTransactions() {
-        LinkedList<Double> sortedByAmount = getTransactions();
+        LinkedList<Double> sortedByAmount = new LinkedList<Double>();
+
+        sortedByAmount.addAll(getTransactions());
 
         mergeSort(sortedByAmount, 0, sortedByAmount.size() - 1);
         return sortedByAmount;
     }
-    public void getTransaction(double amount) {
+    
+    public void getTransaction(double amount) { // finds a specified amount in the transaction list using binary search
         LinkedList<Double> sortedTransactions = getSortedTransactions();
-        System.out.println("Finding amount in transaction history...");
+        System.out.println("\nFinding amount in transaction history...");
 
-        int result = binarySearch(sortedTransactions, amount);
+        int result = binarySearch(sortedTransactions, (double) Math.round(amount * 100) / 100); // rounds amount to two decimal places before checking
 
         if (result == -1) {
             System.out.println("Transaction not found. Make sure that amount is correct.");
         } else {
 
             if (sortedTransactions.get(result) > 0) {
-                System.out.printf("Deposit of %.2f found.%n", sortedTransactions.get(result));
+                System.out.printf("Deposit of $%.2f found.%n", sortedTransactions.get(result));
             } else {
-                System.out.printf("Withdrawal of %.2f found.%n", Math.abs(sortedTransactions.get(result)));
+                System.out.printf("Withdrawal of $%.2f found.%n", Math.abs(sortedTransactions.get(result)));
             }
         }
     }
@@ -52,16 +55,22 @@ public class BankAccount {
         for (int i = 0 ; i < limit ; i++) {
 
             if (sortedTransactions.get(i) < 0) {
-                System.out.printf("%-15s%-15.2f%n", "Withdrawal", Math.abs(sortedTransactions.get(i)));
+                System.out.printf("%-15s $%-15.2f%n", "Withdrawal", Math.abs(sortedTransactions.get(i)));
             } else {
-                System.out.printf("%-15s%-15.2f%n", "Deposit", sortedTransactions.get(i));
+                System.out.printf("%-15s $%-15.2f%n", "Deposit", sortedTransactions.get(i));
             }
 
         }
     }
+    
     public void displayByTime() {
-        System.out.println("Transaction History (Sorted by Time):");
+        System.out.println("\nTransaction History (Sorted by Time):");
         displayTransactions(getTransactions());
+    }
+    
+    public void displayByAmount() {
+    	System.out.println("\nTransaction History (Sorted by Amount):");
+    	displayTransactions(getSortedTransactions());
     }
     public void createTransaction(double amount) {
 
@@ -79,7 +88,17 @@ public class BankAccount {
             type = "deposited";
         }
 
-        System.out.printf("%.2f %s.%n", Math.abs(amount), type);
+        System.out.printf("$%.2f %s.%n", Math.abs(amount), type);
+    }
+    
+    public double calculateTotal() {
+    	double total = 0;
+    	
+    	for (double i : transactions) {
+    		total += i;
+    	}
+    	
+    	return total;
     }
 
     private void merge(LinkedList<Double> linkedList, int left, int middle, int right) // uses merge sort
@@ -108,7 +127,7 @@ public class BankAccount {
 
         while (i < low && j < high)                     //merge the left and right subarrays
         {
-            if (L[i] <= R[j])
+            if (Math.abs(L[i]) >= Math.abs(R[j]))
             {
                 linkedList.set(k, L[i]);
                 i++;
@@ -154,18 +173,21 @@ public class BankAccount {
             int low = 0, high = linkedList.size() - 1;
             while (low <= high) {
                 int mid = low + (high - low) / 2;
+                System.out.println(mid);
 
-                // Check if x is present at mid
-                if (linkedList.get(mid) == amount)
+                // Check if amount is present at mid
+                if ((double) Math.round(linkedList.get(mid) * 100) / 100 == amount) // round is used to check at 2 decimal places
                     return mid;
 
-                // If x greater, ignore left half
-                if (linkedList.get(mid) < amount)
+                // If amount is smaller, ignore left half
+                if ((double) Math.round(linkedList.get(mid) * 100) > amount) // round is used to check at 2 decimal places
                     low = mid + 1;
 
-                    // If x is smaller, ignore right half
+                    // If amount is greater, ignore right half
                 else
                     high = mid - 1;
+                
+                
             }
 
             // If we reach here, then element was
