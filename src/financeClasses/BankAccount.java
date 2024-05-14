@@ -20,17 +20,17 @@ public class BankAccount {
         return transactions;
     }
 
-    private LinkedList<Double> getSortedTransactions() {
+    private LinkedList<Double> getSortedTransactions(boolean absolute) { // absolute variable used to check if list should be sorted only by absolute value
         LinkedList<Double> sortedByAmount = new LinkedList<Double>();
 
         sortedByAmount.addAll(getTransactions());
 
-        mergeSort(sortedByAmount, 0, sortedByAmount.size() - 1);
+        mergeSort(sortedByAmount, 0, sortedByAmount.size() - 1, absolute);
         return sortedByAmount;
     }
     
     public void getTransaction(double amount) { // finds a specified amount in the transaction list using binary search
-        LinkedList<Double> sortedTransactions = getSortedTransactions();
+        LinkedList<Double> sortedTransactions = getSortedTransactions(false);
         System.out.println("\nFinding amount in transaction history...");
 
         int result = binarySearch(sortedTransactions, (double) Math.round(amount * 100) / 100); // rounds amount to two decimal places before checking
@@ -70,14 +70,14 @@ public class BankAccount {
     
     public void displayByAmount() {
     	System.out.println("\nTransaction History (Sorted by Amount):");
-    	displayTransactions(getSortedTransactions());
+    	displayTransactions(getSortedTransactions(true));
     }
     public void createTransaction(double amount) {
 
-        getTransactions().addLast(amount);
+        getTransactions().addFirst(amount);
 
         if (getTransactions().size() > 50) { // can hold up to 50 transactions before removing
-            getTransactions().removeFirst();
+            getTransactions().removeLast();
         }
 
         String type;
@@ -101,7 +101,7 @@ public class BankAccount {
     	return total;
     }
 
-    private void merge(LinkedList<Double> linkedList, int left, int middle, int right) // uses merge sort
+    private void merge(LinkedList<Double> linkedList, int left, int middle, int right, boolean absolute) // uses merge sort
     {
         int low = middle - left + 1;                    //size of the left subarray
         int high = right - middle;                      //size of the right subarray
@@ -127,7 +127,7 @@ public class BankAccount {
 
         while (i < low && j < high)                     //merge the left and right subarrays
         {
-            if (Math.abs(L[i]) >= Math.abs(R[j]))
+            if ((Math.abs(L[i]) >= Math.abs(R[j]) && absolute) || (L[i] >= R[j] && !absolute))
             {
                 linkedList.set(k, L[i]);
                 i++;
@@ -155,38 +155,36 @@ public class BankAccount {
         }
     }
 
-    private void mergeSort(LinkedList<Double> linkedList, int left, int right)       //helper function that creates the sub cases for sorting
+    private void mergeSort(LinkedList<Double> linkedList, int left, int right, boolean absolute)       //helper function that creates the sub cases for sorting
     {
         int middle;
         if (left < right) {                             //sort only if the left index is lesser than the right index (meaning that sorting is done)
             middle = (left + right) / 2;
 
-            mergeSort(linkedList, left, middle);                    //left subarray
-            mergeSort(linkedList, middle + 1, right);               //right subarray
+            mergeSort(linkedList, left, middle, absolute);                    //left subarray
+            mergeSort(linkedList, middle + 1, right, absolute);               //right subarray
 
-            merge(linkedList, left, middle, right);                //merge the two subarrays
+            merge(linkedList, left, middle, right, absolute);                //merge the two subarrays
         }
     }
 
     private int binarySearch(LinkedList<Double> linkedList, double amount) { // uses binary search to find the amount
 
+    		
             int low = 0, high = linkedList.size() - 1;
             while (low <= high) {
                 int mid = low + (high - low) / 2;
-                System.out.println(mid);
-
+                
                 // Check if amount is present at mid
                 if ((double) Math.round(linkedList.get(mid) * 100) / 100 == amount) // round is used to check at 2 decimal places
                     return mid;
 
                 // If amount is smaller, ignore left half
-                if ((double) Math.round(linkedList.get(mid) * 100) > amount) // round is used to check at 2 decimal places
+                if ((double) Math.round(linkedList.get(mid) * 100) / 100> amount) // round is used to check at 2 decimal places
                     low = mid + 1;
-
                     // If amount is greater, ignore right half
                 else
                     high = mid - 1;
-                
                 
             }
 
